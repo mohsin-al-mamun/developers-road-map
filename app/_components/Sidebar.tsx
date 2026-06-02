@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { NAV_SECTIONS, TOPICS } from '@/app/_data/roadmap-data'
 import { ThemeToggle } from './ThemeToggle'
+import { Logo } from './Logo'
 
 function getPhaseForKey(key: string): string | null {
   for (const sec of NAV_SECTIONS) {
@@ -33,21 +34,14 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <div className="logo-text">DevMap</div>
-        <div className="logo-sub">Senior Engineer Roadmap</div>
-      </div>
+      <Link href="/" className="sidebar-logo">
+        <Logo />
+        <div className="logo-text">
+          <span className="logo-dev">Dev</span><span className="logo-map">Map</span>
+        </div>
+      </Link>
 
       <nav className="sidebar-nav">
-        <Link
-          href="/"
-          id="nav-home"
-          className={`nav-item${currentKey === 'home' ? ' active' : ''}`}
-        >
-          <span className="nav-dot" />
-          <span className="nav-label">Home</span>
-        </Link>
-
         {NAV_SECTIONS.map(sec => (
           <div key={sec.phase} className="phase-group">
             <div

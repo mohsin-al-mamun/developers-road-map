@@ -13,10 +13,17 @@ export interface DocLink {
   url: string;
 }
 
+export interface CodeExample {
+  label: string;
+  code: string;
+}
+
 export interface Subtopic {
   title: string;
   what: string;
   points: string[];
+  gotchas?: string[];
+  examples?: CodeExample[];
   docs: DocLink[];
   prompt: string;
 }
@@ -153,6 +160,30 @@ export const TOPICS: Record<string, Topic> = {
               "Functional updates: setState(prev => prev + 1) for values depending on previous state",
               "Same component at same position in the tree shares state across re-renders",
             ],
+            gotchas: [
+              "Mutating state directly (e.g. state.items.push(x) then setState(state)) does NOT trigger a re-render — React uses reference equality; you must return a new object or array",
+              "setState is async — reading state immediately after calling setState gives you the OLD value, not the updated one; use the functional form or useEffect to react to state changes",
+              "Storing derived data in state (e.g. storing filteredList when you have list + filter) causes sync bugs — compute derived values during render instead",
+              "When the same component renders at the same tree position, React preserves its state even if props change — to reset state, change the key prop",
+            ],
+            examples: [
+              {
+                label: "Mutation bug vs correct immutable update",
+                code: `// ❌ WRONG — mutates the existing array, no re-render
+const [items, setItems] = useState([1, 2, 3]);
+items.push(4);
+setItems(items); // same reference, React bails out
+
+// ✅ CORRECT — new array reference triggers re-render
+setItems(prev => [...prev, 4]);
+
+// ❌ WRONG — mutating nested object
+setUser(prev => { prev.name = 'Alice'; return prev; });
+
+// ✅ CORRECT — spread to create new object
+setUser(prev => ({ ...prev, name: 'Alice' }));`,
+              },
+            ],
             docs: [
               {
                 label: "react.dev → State: A Component's Memory",
@@ -171,6 +202,39 @@ export const TOPICS: Record<string, Topic> = {
               "Cleanup function: runs before next effect and on unmount — cancel timers, subscriptions",
               "Each render has its own effect closure — values captured at render time",
               "Do not use effects for derived state, event handling, or data transformations — better solutions exist",
+            ],
+            gotchas: [
+              "Cleanup runs BEFORE the next effect fires, not only on unmount — a fetch inside useEffect should always return a cleanup that aborts it, otherwise you get state updates on unmounted components",
+              "Passing an object or array literal as a dependency causes infinite loops — every render creates a new reference; use primitive values or wrap the value in useMemo",
+              "Stale closure: state read inside an effect captures its value at render time — if state changes after the effect starts, the effect still sees the old value; use a ref or functional setState(prev => ...) to access latest",
+              '[] does not mean "run once forever" — it means "run when no listed value changes"; ESLint exhaustive-deps will catch missing deps; never disable this rule silently',
+            ],
+            examples: [
+              {
+                label: "Cancel fetch on re-render / unmount",
+                code: `useEffect(() => {
+  const controller = new AbortController();
+  fetch('/api/data', { signal: controller.signal })
+    .then(r => r.json())
+    .then(setData)
+    .catch(err => { if (err.name !== 'AbortError') setError(err); });
+  return () => controller.abort();
+}, [url]);`,
+              },
+              {
+                label: "Stale closure bug → fix with functional update",
+                code: `// ❌ count is always 0 inside the interval (stale closure)
+useEffect(() => {
+  const id = setInterval(() => setCount(count + 1), 1000);
+  return () => clearInterval(id);
+}, []);
+
+// ✅ functional update reads latest state
+useEffect(() => {
+  const id = setInterval(() => setCount(c => c + 1), 1000);
+  return () => clearInterval(id);
+}, []);`,
+              },
             ],
             docs: [
               {
@@ -514,6 +578,31 @@ export const TOPICS: Record<string, Topic> = {
               "template.tsx: like layout but re-mounts on every navigation — useful for animations",
               "route.ts: API endpoint — handles HTTP methods, replaces pages/api/",
             ],
+            gotchas: [
+              "In Next.js 15+, params and searchParams are Promises — you must await them before destructuring; forgetting this gives you a Promise object, not the values",
+              "error.tsx must be a Client Component ('use client') — if you forget, errors thrown in Server Components will silently not be caught by your boundary",
+              "layout.tsx does NOT re-render on navigation between routes in the same segment — any state inside a layout persists across navigations, which can be a bug or a feature depending on intent",
+              "route.ts and page.tsx cannot coexist at the same path — a route handler replaces the page entirely for that URL",
+            ],
+            examples: [
+              {
+                label: "Next.js 15 — awaiting params (required)",
+                code: `// ❌ Next.js 15 — params is a Promise, this will be a Promise object
+export default function Page({ params }: { params: { slug: string } }) {
+  console.log(params.slug); // [object Promise]
+}
+
+// ✅ Correct — await params first
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  return <h1>{slug}</h1>;
+}`,
+              },
+            ],
             docs: [
               {
                 label: "nextjs.org → File Conventions",
@@ -623,6 +712,40 @@ export const TOPICS: Record<string, Topic> = {
               "SC can import CC, but CC cannot import SC (only as a prop or children)",
               'Push "use client" as deep in the tree as possible — smaller client JS bundle',
               '"use client" marks a module boundary — all imports in that file become client-side',
+            ],
+            gotchas: [
+              '"use client" does not mean the component only runs on the client — it still renders on the server for the initial HTML (SSR), then hydrates on the client; it means "this component uses client APIs"',
+              "Importing a Client Component into a Server Component is fine — the reverse is not; if you try to import a Server Component into a Client Component, it silently gets treated as a Client Component and loses its server benefits",
+              "Context, useState, and useEffect are only available in Client Components — if you see 'hooks can only be used in Client Components', the file is missing 'use client' at the top",
+              "Third-party packages that use useState/useEffect internally need a Client Component wrapper — most packages built before App Router don't have 'use client' in their source",
+            ],
+            examples: [
+              {
+                label: "Correct pattern — push 'use client' deep",
+                code: `// ✅ Page is a Server Component — fetches data, zero client JS
+export default async function Page() {
+  const posts = await db.post.findMany();
+  return (
+    <div>
+      <h1>Posts</h1>
+      {posts.map(p => (
+        // LikeButton is the only Client Component
+        <article key={p.id}>
+          <h2>{p.title}</h2>
+          <LikeButton postId={p.id} initialLikes={p.likes} />
+        </article>
+      ))}
+    </div>
+  );
+}
+
+// ✅ Only the interactive part is a Client Component
+'use client';
+export function LikeButton({ postId, initialLikes }) {
+  const [likes, setLikes] = useState(initialLikes);
+  return <button onClick={() => setLikes(l => l + 1)}>{likes}</button>;
+}`,
+              },
             ],
             docs: [
               {
@@ -749,6 +872,39 @@ export const TOPICS: Record<string, Topic> = {
               "4. Router Cache: client-side cache of RSC payloads for visited routes — duration: 30s (dynamic), 5min (static)",
               "revalidatePath(path): clears Full Route Cache + Router Cache for that path",
               "revalidateTag(tag): clears Data Cache entries and Full Route Cache for tagged fetches",
+            ],
+            gotchas: [
+              "Next.js 15 changed Data Cache to OPT-IN — in v14 fetch() was cached by default; in v15 it is not — if you upgraded and your data is no longer cached, this is why",
+              "Router Cache cannot be fully disabled in Next.js 14 — even after calling revalidatePath() on the server, the client may serve stale RSC payload for up to 30 seconds; use router.refresh() on the client to force-clear it",
+              "revalidatePath('/') does NOT clear all routes — it only clears that exact path and its children; if you have a dynamic route like /posts/[slug], you must call revalidatePath('/posts/[slug]', 'page') or use revalidateTag instead",
+              "Request Memoization only works within a SINGLE request — it does not cache across requests like Data Cache does; do not confuse the two",
+            ],
+            examples: [
+              {
+                label: "Next.js 15 — opt-in caching vs no-store",
+                code: `// Next.js 15: fetch is NOT cached by default
+const data = await fetch('/api/posts'); // fresh every request
+
+// Opt-in to Data Cache
+const data = await fetch('/api/posts', {
+  cache: 'force-cache',
+  next: { tags: ['posts'] }, // tag for revalidateTag()
+});
+
+// Explicitly uncached (same as default in v15)
+const data = await fetch('/api/posts', { cache: 'no-store' });`,
+              },
+              {
+                label: "Revalidate by tag after mutation",
+                code: `// Server Action after creating a post
+'use server'
+import { revalidateTag } from 'next/cache';
+
+export async function createPost(data: FormData) {
+  await db.post.create({ ... });
+  revalidateTag('posts'); // clears all fetches tagged 'posts'
+}`,
+              },
             ],
             docs: [
               {
@@ -954,6 +1110,36 @@ export const TOPICS: Record<string, Topic> = {
               "Phase 6 — Check: setImmediate callbacks — always runs after I/O phase",
               'Phase 7 — Close: socket "close" events and similar cleanup callbacks',
               "Between each phase: process.nextTick queue drains completely, then microtask (Promise) queue",
+            ],
+            gotchas: [
+              "setTimeout(fn, 0) does NOT mean 'run immediately' — the minimum delay is ~1ms and it runs in the Timers phase, which may be after I/O callbacks and setImmediate depending on where you call it",
+              "Blocking the event loop with CPU work (large JSON.parse, heavy regex, sync crypto) blocks ALL incoming requests — Node.js is single-threaded; one slow synchronous call blocks everything",
+              "process.nextTick callbacks run between EVERY phase, not just at the end of a tick — if you recursively call nextTick, you starve I/O and timers indefinitely",
+              "Async functions resume after await in the microtask queue — not in a new event loop iteration; this means they have higher priority than setImmediate and setTimeout",
+            ],
+            examples: [
+              {
+                label: "Execution order — predict the output",
+                code: `console.log('1 — sync');
+
+setTimeout(() => console.log('2 — setTimeout'), 0);
+
+Promise.resolve().then(() => console.log('3 — Promise microtask'));
+
+process.nextTick(() => console.log('4 — nextTick'));
+
+setImmediate(() => console.log('5 — setImmediate'));
+
+console.log('6 — sync');
+
+// Output order:
+// 1 — sync
+// 6 — sync
+// 4 — nextTick        (nextTick queue drains first)
+// 3 — Promise microtask (microtask queue second)
+// 2 — setTimeout      (Timers phase)
+// 5 — setImmediate    (Check phase — after I/O)`,
+              },
             ],
             docs: [
               {
@@ -1182,6 +1368,33 @@ export const TOPICS: Record<string, Topic> = {
               "Type cannot merge — redefining a type alias is an error",
               "Prefer interface for: public API shapes, class contracts, anything that may be extended",
               "Prefer type for: unions, intersections, mapped types, complex compositions",
+            ],
+            gotchas: [
+              "Declaration merging can bite you silently — if two files both declare 'interface Window', they merge; if one has a typo in a property, TypeScript may accept bad code because the correct property came from the other declaration",
+              "type is NOT always slower than interface for the TypeScript compiler — the old advice that interfaces were faster is largely irrelevant in modern TypeScript; choose based on semantics, not performance",
+              "Extending a type with & intersection does NOT give an error on conflicting properties — if two intersected types have the same property with different types, the result is 'never', which is silently unusable",
+            ],
+            examples: [
+              {
+                label: "The key behavioral differences",
+                code: `// 1. Declaration merging — only interface supports this
+interface User { name: string; }
+interface User { age: number; }
+// User is now { name: string; age: number } — valid
+
+type Product = { name: string; };
+type Product = { price: number }; // ❌ ERROR: duplicate identifier
+
+// 2. Union types — only type aliases
+type Status = 'active' | 'inactive' | 'pending'; // ✅
+interface Status = 'active' | 'inactive'; // ❌ not valid syntax
+
+// 3. Intersection conflict — silent never
+type A = { value: string };
+type B = { value: number };
+type AB = A & B;
+const x: AB = { value: 'hello' }; // ❌ value is never (string & number)`,
+              },
             ],
             docs: [
               {
@@ -2747,6 +2960,30 @@ export const TOPICS: Record<string, Topic> = {
               "inherit, initial, unset, revert keywords — explicitly control inherited values",
               ":where() has zero specificity — useful for resets and overridable base styles",
             ],
+            gotchas: [
+              "A single ID selector (#header) beats any number of class selectors (.nav.active.visible.open) — if you use IDs for styling, you almost always need !important to override them later",
+              "Specificity is not additive across rules — it only compares the WINNING declaration from each rule; having 10 class selectors in one rule does not beat 1 ID selector",
+              "Inherited properties like color pass through the tree silently — setting color on a parent affects all descendants unless they have their own color rule; this is often the cause of unexpected text colors inside third-party components",
+              ":is() inherits the specificity of its MOST SPECIFIC argument — :is(#id, .class) has specificity of ID(100) even when matching only the .class element",
+            ],
+            examples: [
+              {
+                label: "Specificity calculation — which rule wins?",
+                code: `/* Specificity: 0-1-0 (one class) */
+.button { color: blue; }
+
+/* Specificity: 0-2-0 (two classes) — wins over above */
+.nav .button { color: red; }
+
+/* Specificity: 1-0-0 (one ID) — beats ALL class selectors */
+#header { color: green; }
+
+/* ✅ Avoid specificity wars — use :where() for zero specificity */
+:where(.button) { color: blue; } /* Specificity: 0-0-0 */
+/* Any class selector can now override this */
+.nav .button { color: red; } /* 0-2-0 wins easily */`,
+              },
+            ],
             docs: [
               {
                 label: "MDN → Cascade and Inheritance",
@@ -3096,6 +3333,44 @@ export const TOPICS: Record<string, Topic> = {
               "USER node: never run as root inside a container — security best practice",
               'Next.js standalone caveat: output: "standalone" emits a minimal server to .next/standalone but does NOT bundle static assets — you must explicitly COPY .next/static into .next/standalone/.next/static and COPY public/ into .next/standalone/public/, or client-side assets (JS chunks, images) will 404 at runtime',
             ],
+            gotchas: [
+              "COPY . . before npm ci is the most common Dockerfile mistake — every source file change invalidates the node_modules cache layer, causing a full npm install on every build; always copy package files first",
+              "Using FROM node:20 (not alpine) in production adds ~800MB vs ~150MB for alpine — use alpine variants unless you need glibc-specific binaries",
+              "Running as root inside the container means a container escape gives the attacker root on the host — always add USER node before CMD",
+              ".dockerignore is not optional — without it, COPY . . includes node_modules, .git, .env, and .next into the image context, making builds slow and leaking secrets",
+            ],
+            examples: [
+              {
+                label: "Production Next.js 15 Dockerfile (multi-stage)",
+                code: `FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+USER nextjs
+EXPOSE 3000
+CMD ["node", "server.js"]`,
+              },
+              {
+                label: ".dockerignore (always include this)",
+                code: `node_modules
+.next
+.git
+.env
+.env.local
+npm-debug.log
+README.md`,
+              },
+            ],
             docs: [
               {
                 label: "Dockerfile reference",
@@ -3145,6 +3420,39 @@ export const TOPICS: Record<string, Topic> = {
               "volumes: named volumes persist data between container restarts — bind mounts sync local files",
               "environment: inject env vars — use .env file with docker compose, never hardcode secrets",
               "docker compose up -d — start all services in background — docker compose logs -f to follow",
+            ],
+            gotchas: [
+              "depends_on: [db] only waits for the container process to start — Postgres takes 1-2 extra seconds to accept connections after the process starts; your app will crash with ECONNREFUSED if you use the short form",
+              "Named volumes persist between docker compose down and up — but docker compose down -v deletes them permanently including your database data; never run -v unless you mean to wipe all data",
+              "bind mounts on Mac/Windows are significantly slower than on Linux — heavy file I/O inside a bind-mounted directory (like running npm install inside the container) will be noticeably slow",
+            ],
+            examples: [
+              {
+                label: "compose.yml with healthcheck + depends_on (correct)",
+                code: `services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy  # waits for healthcheck to pass
+    env_file: .env
+
+volumes:
+  db_data:`,
+              },
             ],
             docs: [
               {

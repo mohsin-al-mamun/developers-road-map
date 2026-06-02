@@ -19,22 +19,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="home-stats">
-          {[
-            { val: '12',   label: 'topics' },
-            { val: '154',  label: 'subtopics' },
-            { val: '3',    label: 'phases' },
-            { val: '~320', label: 'study hours' },
-            { val: '6–7',  label: 'months' },
-          ].map(s => (
-            <div key={s.label} className="stat">
-              <span className="stat-val">{s.val}</span>
-              <span className="stat-label">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
         {/* Phase cards */}
         <div className="home-phases">
           <div className="home-phases-title">Three phases to senior level</div>
@@ -63,16 +47,16 @@ export default function Home() {
 
         {/* Study loop */}
         <div className="study-loop-box">
-          <div className="loop-title">Study loop — use for every topic</div>
+          <div className="loop-title">Study loop — repeat for every topic</div>
           <div className="loop-steps">
             {[
-              { n: '01', title: 'Read official docs',   desc: 'Build the correct mental model first. Docs give you the right terminology and edge cases.' },
-              { n: '02', title: 'Talk to Claude',       desc: 'Ask for explanations, clarify confusion, get analogies. Use the prompt in each card.' },
-              { n: '03', title: 'Build a mini project', desc: 'Prove your understanding with working code. Seeing it run makes it stick.' },
-              { n: '04', title: 'Mock interview',       desc: 'Ask Claude to quiz you. Can you explain it without notes? That is the bar.' },
+              { n: '01', title: 'Read official docs',   desc: 'Build the correct mental model first. Docs give you the right terminology and edge cases.', color: 'var(--acc)'   },
+              { n: '02', title: 'Talk to Claude',       desc: 'Ask for explanations, clarify confusion, get analogies. Use the prompt in each card.',      color: 'var(--vi)'    },
+              { n: '03', title: 'Build a mini project', desc: 'Prove your understanding with working code. Seeing it run makes it stick.',                  color: 'var(--grn)'   },
+              { n: '04', title: 'Mock interview',       desc: 'Ask Claude to quiz you. Can you explain it without notes? That is the bar.',                 color: 'var(--amber)' },
             ].map(step => (
               <div key={step.n} className="loop-step">
-                <div className="loop-num">{step.n}</div>
+                <span className="loop-num" style={{ color: step.color }}>{step.n}</span>
                 <div className="loop-step-title">{step.title}</div>
                 <div className="loop-step-desc">{step.desc}</div>
               </div>
