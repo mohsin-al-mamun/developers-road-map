@@ -1,65 +1,86 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { NAV_SECTIONS, PHASE_META, TOPICS } from './_data/roadmap-data'
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="home-view">
+      <div className="home-container">
+
+        {/* Hero */}
+        <div className="home-hero">
+          <div className="home-eyebrow">Senior Developer Roadmap · 2025</div>
+          <h1 className="home-title">
+            Everything you need<br />to reach <em>senior level</em>.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="home-desc">
+            A complete, ordered guide covering React, Next.js, Node.js, TypeScript, DSA,
+            system design, databases, AI integration, and security. No fluff — only what
+            matters for interviews and real production work.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Stats */}
+        <div className="home-stats">
+          {[
+            { val: '10',   label: 'topics' },
+            { val: '127',  label: 'subtopics' },
+            { val: '3',    label: 'phases' },
+            { val: '~260', label: 'study hours' },
+            { val: '5–6',  label: 'months' },
+          ].map(s => (
+            <div key={s.label} className="stat">
+              <span className="stat-val">{s.val}</span>
+              <span className="stat-label">{s.label}</span>
+            </div>
+          ))}
         </div>
-      </main>
+
+        {/* Phase cards */}
+        <div className="home-phases">
+          <div className="home-phases-title">Three phases to senior level</div>
+          <div className="phases-grid">
+            {NAV_SECTIONS.map(sec => {
+              const pm = PHASE_META[sec.phase]
+              return (
+                <div key={sec.phase} className="phase-card">
+                  <div className="phase-card-header">
+                    <span className={`phase-badge ${sec.phase}`}>{pm.label}</span>
+                    <span className="phase-card-title">{pm.title}</span>
+                  </div>
+                  <div className="phase-card-meta">{pm.weeks} · {pm.hours}</div>
+                  <div className="phase-topics-row">
+                    {sec.keys.map(key => (
+                      <Link key={key} href={`/${key}`} className="phase-topic-chip">
+                        {TOPICS[key].title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Study loop */}
+        <div className="study-loop-box">
+          <div className="loop-title">Study loop — use for every topic</div>
+          <div className="loop-steps">
+            {[
+              { n: '01', title: 'Read official docs',   desc: 'Build the correct mental model first. Docs give you the right terminology and edge cases.' },
+              { n: '02', title: 'Talk to Claude',       desc: 'Ask for explanations, clarify confusion, get analogies. Use the prompt in each card.' },
+              { n: '03', title: 'Build a mini project', desc: 'Prove your understanding with working code. Seeing it run makes it stick.' },
+              { n: '04', title: 'Mock interview',       desc: 'Ask Claude to quiz you. Can you explain it without notes? That is the bar.' },
+            ].map(step => (
+              <div key={step.n} className="loop-step">
+                <div className="loop-num">{step.n}</div>
+                <div className="loop-step-title">{step.title}</div>
+                <div className="loop-step-desc">{step.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
     </div>
-  );
+  )
 }
