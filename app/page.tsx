@@ -22,11 +22,11 @@ export default function Home() {
         {/* Stats */}
         <div className="home-stats">
           {[
-            { val: '10',   label: 'topics' },
-            { val: '127',  label: 'subtopics' },
+            { val: '12',   label: 'topics' },
+            { val: '154',  label: 'subtopics' },
             { val: '3',    label: 'phases' },
-            { val: '~260', label: 'study hours' },
-            { val: '5–6',  label: 'months' },
+            { val: '~320', label: 'study hours' },
+            { val: '6–7',  label: 'months' },
           ].map(s => (
             <div key={s.label} className="stat">
               <span className="stat-val">{s.val}</span>
