@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google'
 import './globals.css'
 import { Sidebar } from './_components/Sidebar'
+import { MobileNav } from './_components/MobileNav'
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -33,6 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <MobileNav />
         <div className="app">
           <Sidebar />
           <main className="main">{children}</main>
