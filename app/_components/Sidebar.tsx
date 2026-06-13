@@ -19,8 +19,7 @@ export function Sidebar() {
   const currentKey = pathname === '/' ? 'home' : pathname.slice(1)
 
   const [openPhase, setOpenPhase] = useState<string | null>(() => {
-    const phase = getPhaseForKey(currentKey)
-    return phase ?? 'p1'
+    return getPhaseForKey(currentKey) ?? null
   })
 
   useEffect(() => {

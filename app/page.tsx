@@ -17,27 +17,36 @@ export default function Home() {
             system design, databases, AI integration, and security. No fluff — only what
             matters for interviews and real production work.
           </p>
+          <div className="home-cta-row">
+            <Link href="/react-internals" className="home-cta-btn">
+              Start with Phase 1 →
+            </Link>
+          </div>
         </div>
 
         {/* Phase cards */}
         <div className="home-phases">
           <div className="home-phases-title">Three phases to senior level</div>
           <div className="phases-grid">
-            {NAV_SECTIONS.map(sec => {
+            {NAV_SECTIONS.map((sec, i) => {
               const pm = PHASE_META[sec.phase]
+              const num = String(i + 1).padStart(2, '0')
               return (
-                <div key={sec.phase} className="phase-card">
-                  <div className="phase-card-header">
-                    <span className={`phase-badge ${sec.phase}`}>{pm.label}</span>
-                    <span className="phase-card-title">{pm.title}</span>
-                  </div>
-                  <div className="phase-card-meta">{pm.weeks} · {pm.hours}</div>
-                  <div className="phase-topics-row">
-                    {sec.keys.map(key => (
-                      <Link key={key} href={`/${key}`} className="phase-topic-chip">
-                        {TOPICS[key].title}
-                      </Link>
-                    ))}
+                <div key={sec.phase} className={`phase-card-slot ${sec.phase}`}>
+                  <div className={`phase-card ${sec.phase}`}>
+                    <Link href={`/${sec.keys[0]}`} className="phase-card-overlay" aria-label={pm.title} />
+                    <div className="phase-card-header">
+                      <span className={`phase-step-num ${sec.phase}`}>{num}</span>
+                      <span className="phase-card-meta">{pm.weeks} · {pm.hours}</span>
+                    </div>
+                    <div className="phase-card-title">{pm.title}</div>
+                    <div className="phase-topics-row">
+                      {sec.keys.map(key => (
+                        <Link key={key} href={`/${key}`} className={`phase-topic-chip ${sec.phase}`}>
+                          {TOPICS[key].title}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )

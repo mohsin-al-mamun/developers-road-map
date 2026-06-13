@@ -262,6 +262,23 @@ body {
 }
 
 
+.home-cta-row { display: flex; gap: 12px; margin-top: 8px; }
+.home-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--acc);
+  color: #fff;
+  font-family: var(--font-ibm-plex-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background .15s, transform .1s;
+}
+.home-cta-btn:hover { background: var(--acc2); transform: translateY(-1px); }
+
 .home-phases { display: flex; flex-direction: column; gap: 16px; }
 .home-phases-title {
   font-family: var(--font-ibm-plex-sans), sans-serif;
@@ -271,23 +288,69 @@ body {
   text-transform: uppercase;
   color: var(--text3);
 }
-.phases-grid { display: flex; flex-direction: column; gap: 10px; }
+.phases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
+.phase-card-slot { display: flex; }
+.phase-card-slot.p2 { padding-top: 32px; }
+.phase-card-slot.p3 { padding-top: 64px; }
 .phase-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px 28px;
-  transition: border-color .2s, box-shadow .2s;
+  flex: 1;
+  border-radius: 14px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
 }
-.phase-card:hover {
-  border-color: var(--border2);
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--text) 4%, transparent);
+.phase-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
+.phase-card:hover { transform: translateY(-3px); }
+.phase-card.p1 {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--acc) 30%, var(--bg2)) 0%, var(--bg3) 80%);
+  border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--acc) 12%, transparent);
+}
+.phase-card.p2 {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--sky) 30%, var(--bg2)) 0%, var(--bg3) 80%);
+  border-color: color-mix(in srgb, var(--sky) 45%, transparent);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--sky) 12%, transparent);
+}
+.phase-card.p3 {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--vi) 30%, var(--bg2)) 0%, var(--bg3) 80%);
+  border-color: color-mix(in srgb, var(--vi) 45%, transparent);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--vi) 12%, transparent);
+}
+.phase-card.p1:hover { box-shadow: 0 8px 32px color-mix(in srgb, var(--acc) 22%, transparent); }
+.phase-card.p2:hover { box-shadow: 0 8px 32px color-mix(in srgb, var(--sky) 22%, transparent); }
+.phase-card.p3:hover { box-shadow: 0 8px 32px color-mix(in srgb, var(--vi) 22%, transparent); }
+
+.phase-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+.phase-step-num.p1 { background: var(--acc); color: #fff; }
+.phase-step-num.p2 { background: var(--sky); color: #fff; }
+.phase-step-num.p3 { background: var(--vi);  color: #fff; }
+
 .phase-card-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 .phase-badge {
   font-size: 9px;
@@ -299,41 +362,40 @@ body {
   white-space: nowrap;
   font-family: var(--font-ibm-plex-mono), monospace;
 }
-.phase-badge.p1 { background: color-mix(in srgb, var(--acc) 12%, transparent); color: var(--acc); }
-.phase-badge.p2 { background: color-mix(in srgb, var(--sky) 12%, transparent); color: var(--sky); }
-.phase-badge.p3 { background: color-mix(in srgb, var(--vi) 12%, transparent); color: var(--vi); }
+.phase-badge.p1 { background: color-mix(in srgb, var(--acc) 20%, transparent); color: var(--acc); }
+.phase-badge.p2 { background: color-mix(in srgb, var(--sky) 20%, transparent); color: var(--sky); }
+.phase-badge.p3 { background: color-mix(in srgb, var(--vi) 20%, transparent); color: var(--vi); }
 .phase-card-title {
   font-family: var(--font-ibm-plex-sans), sans-serif;
-  font-weight: 600;
-  font-size: 17px;
+  font-weight: 700;
+  font-size: 20px;
   color: var(--text);
+  line-height: 1.2;
 }
 .phase-card-meta {
-  font-size: 12.5px;
-  font-family: var(--font-ibm-plex-sans), sans-serif;
-  color: var(--text3);
-  margin-bottom: 14px;
-}
-.phase-topics-row { display: flex; flex-wrap: wrap; gap: 6px; }
-.phase-topic-chip {
-  font-size: 12px;
+  font-size: 11.5px;
+  font-family: var(--font-ibm-plex-mono), monospace;
   color: var(--text2);
-  background: var(--bg3);
-  border: 1px solid var(--border);
+}
+.phase-topics-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; position: relative; z-index: 1; }
+.phase-topic-chip {
+  font-size: 11.5px;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border2) 60%, transparent);
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 4px 11px;
   cursor: pointer;
   transition: all .15s;
   font-family: var(--font-ibm-plex-sans), sans-serif;
   font-weight: 400;
   text-decoration: none;
   display: inline-block;
+  backdrop-filter: blur(4px);
 }
-.phase-topic-chip:hover {
-  border-color: var(--border2);
-  color: var(--text);
-  background: var(--bg4);
-}
+.phase-topic-chip.p1:hover { border-color: var(--acc); color: var(--acc); background: color-mix(in srgb, var(--acc) 10%, transparent); }
+.phase-topic-chip.p2:hover { border-color: var(--sky); color: var(--sky); background: color-mix(in srgb, var(--sky) 10%, transparent); }
+.phase-topic-chip.p3:hover { border-color: var(--vi);  color: var(--vi);  background: color-mix(in srgb, var(--vi)  10%, transparent); }
 .study-loop-box {
   display: flex;
   flex-direction: column;
@@ -350,7 +412,7 @@ body {
 .loop-steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
+  gap: 8px;
 }
 .loop-step {
   position: relative;
@@ -844,7 +906,9 @@ body {
   .home-container { padding: 32px 20px 56px; }
   .home-title { font-size: 30px; }
   .home-desc { font-size: 15px; }
-  .phases-grid { gap: 10px; }
+  .phases-grid { grid-template-columns: 1fr; gap: 12px; }
+  .phase-card-slot.p2 { padding-top: 0; }
+  .phase-card-slot.p3 { padding-top: 0; }
   .phase-card { padding: 18px 20px; }
   .loop-steps { grid-template-columns: 1fr 1fr; gap: 10px; }
   .loop-step { padding: 24px 18px 28px; }
