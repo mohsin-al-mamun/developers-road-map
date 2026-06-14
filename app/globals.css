@@ -122,7 +122,7 @@ body {
 .phase-row-label {
   font-family: var(--font-ibm-plex-sans), sans-serif;
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 14.5px;
   color: var(--text2);
   flex: 1;
   letter-spacing: 0.1px;
@@ -182,7 +182,7 @@ body {
 .nav-item.active .nav-dot { background: var(--acc); transform: scale(1.5); }
 
 .nav-label {
-  font-size: 13.5px;
+  font-size: 15px;
   color: var(--text2);
   font-family: var(--font-ibm-plex-sans), sans-serif;
   font-weight: 400;
@@ -231,7 +231,7 @@ body {
   gap: 56px;
 }
 
-.home-hero { display: flex; flex-direction: column; gap: 14px; }
+.home-hero { display: flex; flex-direction: column; gap: 20px; }
 .home-eyebrow {
   font-size: 10px;
   font-weight: 600;
@@ -242,23 +242,25 @@ body {
 .home-title {
   font-family: var(--font-ibm-plex-sans), sans-serif;
   font-weight: 700;
-  font-size: 48px;
-  line-height: 1.08;
-  letter-spacing: -1px;
+  font-size: 68px;
+  line-height: 1.05;
+  letter-spacing: -2px;
   color: var(--text);
 }
 .home-title em {
   font-family: var(--font-ibm-plex-sans), sans-serif;
   font-style: italic;
   font-weight: 300;
-  color: var(--text2);
+  background: linear-gradient(120deg, #f97316, #dc2626);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .home-desc {
-  font-size: 17px;
+  font-size: 20px;
   font-family: var(--font-ibm-plex-sans), sans-serif;
   color: var(--text2);
-  line-height: 1.8;
-  max-width: 680px;
+  line-height: 1.7;
 }
 
 
@@ -295,13 +297,14 @@ body {
 .phase-card {
   flex: 1;
   border-radius: 14px;
-  padding: 28px 24px;
+  padding: 36px 32px;
   position: relative;
   overflow: hidden;
   border: 1px solid transparent;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 240px;
   transition: transform .2s, box-shadow .2s;
   cursor: pointer;
 }
@@ -904,8 +907,8 @@ body {
 
   /* Home */
   .home-container { padding: 32px 20px 56px; }
-  .home-title { font-size: 30px; }
-  .home-desc { font-size: 15px; }
+  .home-title { font-size: 36px; letter-spacing: -1px; }
+  .home-desc { font-size: 16px; }
   .phases-grid { grid-template-columns: 1fr; gap: 12px; }
   .phase-card-slot.p2 { padding-top: 0; }
   .phase-card-slot.p3 { padding-top: 0; }

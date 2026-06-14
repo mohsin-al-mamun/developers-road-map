@@ -18,7 +18,7 @@ export default function Home() {
             matters for interviews and real production work.
           </p>
           <div className="home-cta-row">
-            <Link href="/react-internals" className="home-cta-btn">
+            <Link href="/react" className="home-cta-btn">
               Start with Phase 1 →
             </Link>
           </div>
